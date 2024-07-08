@@ -4,6 +4,10 @@ const formAddUrlEl = document.querySelector<HTMLFormElement>(".form--add-url")!;
 const formInputWebNameEl = document.querySelector<HTMLInputElement>(".form__input--web-name")!;
 const formInputWebUrlEl = document.querySelector<HTMLInputElement>(".form__input--web-url")!;
 
+const searchFormItemEl = document.querySelector<HTMLFormElement>(".form--search-item")!;
+const formInputSearchEl = document.querySelector<HTMLInputElement>(".form__input--search")!;
+const searchItemBoxEl = document.querySelector<HTMLDivElement>(".search-item-box")!;
+
 const listEl = document.querySelector<HTMLUListElement>(".list")!;
 
 let index: number = 1;
@@ -54,6 +58,35 @@ function getStorageItems(): WebsiteListItem[] | [] {
   return storedLists ? JSON.parse(storedLists) : [];
 }
 
+function displaySearchResult(item: WebsiteListItem) {
+  searchItemBoxEl.classList.remove("hidden");
+  listEl.classList.add("hidden");
+  searchItemBoxEl.innerHTML = "";
+
+  const p = document.createElement("p");
+  p.setAttribute("class", "search__item");
+
+  const a = document.createElement("a");
+  a.textContent = `1 ${item.name}`;
+  a.setAttribute("href", item.href);
+  a.setAttribute("id", item.id.toString());
+  a.setAttribute("class", "search__link");
+  a.setAttribute("target", "_blank");
+
+  p.appendChild(a);
+  searchItemBoxEl.appendChild(p);
+
+  a.addEventListener("click", () => {
+    setTimeout(resetSearchResult, 3000);
+  });
+}
+
+function resetSearchResult() {
+  searchItemBoxEl.classList.add("hidden");
+  listEl.classList.remove("hidden");
+  searchItemBoxEl.innerHTML = "";
+}
+
 function handleSubmit(event: SubmitEvent) {
   event.preventDefault();
 
@@ -61,6 +94,9 @@ function handleSubmit(event: SubmitEvent) {
   const webUrl = formInputWebUrlEl.value;
 
   if (!webName || !webUrl) return alert("make sure  to provide the required data...");
+
+  searchItemBoxEl.classList.add("hidden");
+  listEl.classList.remove("hidden");
 
   const newListItem = createItem(webName, webUrl);
 
@@ -74,4 +110,20 @@ function handleSubmit(event: SubmitEvent) {
   formInputWebUrlEl.value = "";
 }
 
+function handleSearchFormSubmit(event: SubmitEvent) {
+  event.preventDefault();
+
+  const searchInputValue = formInputSearchEl.value.toLowerCase();
+  if (!searchInputValue) return;
+
+  const item = lists.find((el) => el.name.toLowerCase().includes(searchInputValue));
+
+  if (item) {
+    displaySearchResult(item);
+  } else {
+    resetSearchResult();
+  }
+}
+
 formAddUrlEl.addEventListener("submit", handleSubmit);
+searchFormItemEl.addEventListener("submit", handleSearchFormSubmit);
