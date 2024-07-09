@@ -33,7 +33,9 @@ function addItemToList(websiteListItem: WebsiteListItem) {
 function render(item: WebsiteListItem) {
   const li = document.createElement("li");
   li.setAttribute("class", "list__item");
+  li.setAttribute("id", item.id.toString());
 
+  // Link to the url
   const a = document.createElement("a");
   a.textContent = `${index}. ${item.name}`;
   a.setAttribute("href", item.href);
@@ -41,7 +43,14 @@ function render(item: WebsiteListItem) {
   a.setAttribute("class", "list__link");
   a.setAttribute("target", "_blank");
 
+  // Button to delete the item
+  const button = document.createElement("button");
+  button.textContent = "X";
+  button.setAttribute("class", "btn btn--delete");
+  button.setAttribute("id", item.id.toString());
+
   li.appendChild(a);
+  li.appendChild(button);
 
   listEl.appendChild(li);
 
@@ -125,5 +134,18 @@ function handleSearchFormSubmit(event: SubmitEvent) {
   }
 }
 
+function handleDeleteItem(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (target.classList.contains("btn--delete")) {
+    const id = parseInt(target.id);
+    const itemIndex = lists.findIndex((el) => el.id === id);
+    lists.splice(itemIndex, 1);
+    document.getElementById(`${id}`)?.remove();
+    updateStorage();
+  }
+}
+
 formAddUrlEl.addEventListener("submit", handleSubmit);
 searchFormItemEl.addEventListener("submit", handleSearchFormSubmit);
+
+document.addEventListener("click", handleDeleteItem);

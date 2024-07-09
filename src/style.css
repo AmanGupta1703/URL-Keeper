@@ -44,7 +44,6 @@ body {
 }
 
 .main {
-  border: 0.4rem solid;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,6 +146,12 @@ body {
   gap: 1rem;
 }
 
+.list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .list__link,
 .search__link {
   color: #3498db;
@@ -173,4 +178,30 @@ body {
   display: block;
   opacity: 1;
   pointer-events: all;
+}
+
+@media screen and (max-width: 480px) {
+  .section {
+    box-shadow: none;
+  }
+
+  .section * {
+    font-size: 1.2rem;
+  }
+
+  .form--add-url {
+    flex-direction: column;
+  }
+
+  .btn--submit {
+    align-self: stretch;
+  }
+
+  .search-box-lists {
+    flex-direction: column;
+  }
+
+  .form--search-item {
+    flex-direction: column;
+  }
 }
