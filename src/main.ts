@@ -1,5 +1,7 @@
 import "./style.css";
 
+// TODO: Edit Item
+
 const formAddUrlEl = document.querySelector<HTMLFormElement>(".form--add-url")!;
 const formInputWebNameEl = document.querySelector<HTMLInputElement>(".form__input--web-name")!;
 const formInputWebUrlEl = document.querySelector<HTMLInputElement>(".form__input--web-url")!;
@@ -11,6 +13,8 @@ const searchItemBoxEl = document.querySelector<HTMLDivElement>(".search-item-box
 const listEl = document.querySelector<HTMLUListElement>(".list")!;
 
 let index: number = 1;
+let editMode: boolean = false;
+let editItemId: number;
 
 type WebsiteListItem = {
   id: number;
@@ -30,6 +34,15 @@ function addItemToList(websiteListItem: WebsiteListItem) {
   lists.push(websiteListItem);
 }
 
+function createButton(textContent: string, classes: string[], id: string): HTMLButtonElement {
+  const button = document.createElement("button");
+  button.textContent = textContent;
+  button.setAttribute("class", classes.join(" "));
+  button.setAttribute("id", id);
+
+  return button;
+}
+
 function render(item: WebsiteListItem) {
   const li = document.createElement("li");
   li.setAttribute("class", "list__item");
@@ -43,14 +56,21 @@ function render(item: WebsiteListItem) {
   a.setAttribute("class", "list__link");
   a.setAttribute("target", "_blank");
 
+  // Delete + edit btn in a div
+  const buttonBoxEl = document.createElement("div");
+  buttonBoxEl.setAttribute("class", "button-box");
+
   // Button to delete the item
-  const button = document.createElement("button");
-  button.textContent = "X";
-  button.setAttribute("class", "btn btn--delete");
-  button.setAttribute("id", item.id.toString());
+  const deleteButtonEl = createButton("X", ["btn", "btn--delete"], item.id.toString());
+
+  // Button to edit a item
+  const editButtonEl = createButton("Edit", ["btn", "btn--edit"], item.id.toString());
+
+  buttonBoxEl.appendChild(deleteButtonEl);
+  buttonBoxEl.appendChild(editButtonEl);
 
   li.appendChild(a);
-  li.appendChild(button);
+  li.appendChild(buttonBoxEl);
 
   listEl.appendChild(li);
 
@@ -107,6 +127,19 @@ function handleSubmit(event: SubmitEvent) {
   searchItemBoxEl.classList.add("hidden");
   listEl.classList.remove("hidden");
 
+  if (editMode && editItemId) {
+    const itemToEdit = lists.find((el) => el.id === editItemId);
+
+    if (itemToEdit) {
+      itemToEdit.name = webName;
+      itemToEdit.href = webUrl;
+      render(itemToEdit);
+      updateStorage();
+    }
+
+    return;
+  }
+
   const newListItem = createItem(webName, webUrl);
 
   addItemToList(newListItem);
@@ -145,7 +178,30 @@ function handleDeleteItem(event: MouseEvent) {
   }
 }
 
+function handleEditItem(event: MouseEvent) {
+  const listItemEl = (event.target as HTMLElement).closest(".list__item");
+
+  const id = listItemEl?.getAttribute("id") ?? null;
+
+  const itemToEdit = lists.find((el) => el.id === Number(id));
+
+  if (itemToEdit) {
+    editMode = true;
+    editItemId = parseInt(id ?? "");
+
+    formInputWebNameEl.value = itemToEdit.name;
+    formInputWebUrlEl.value = itemToEdit.href;
+
+    document.getElementById(`${id}`)?.remove();
+  }
+}
+
 formAddUrlEl.addEventListener("submit", handleSubmit);
 searchFormItemEl.addEventListener("submit", handleSearchFormSubmit);
 
-document.addEventListener("click", handleDeleteItem);
+document.addEventListener("click", (event) => {
+  if ((event.target as HTMLElement).classList.contains("btn--delete"))
+    return handleDeleteItem(event);
+
+  if ((event.target as HTMLElement).classList.contains("btn--edit")) return handleEditItem(event);
+});

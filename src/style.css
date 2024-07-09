@@ -143,7 +143,7 @@ body {
 .list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
 .list__item {
@@ -166,6 +166,18 @@ body {
 .list__link:visited,
 .search__link:visited {
   color: #206b9b;
+}
+
+.button-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn--delete,
+.btn--edit {
+  border-radius: 1rem;
+  padding: 0.5rem 1rem;
 }
 
 .hidden {
