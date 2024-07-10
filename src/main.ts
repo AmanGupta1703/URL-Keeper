@@ -1,6 +1,6 @@
 import "./style.css";
 
-// TODO: Edit Item
+import { createItem, createButton, updateStorage, getStorageItems } from "./utils";
 
 const formAddUrlEl = document.querySelector<HTMLFormElement>(".form--add-url")!;
 const formInputWebNameEl = document.querySelector<HTMLInputElement>(".form__input--web-name")!;
@@ -10,11 +10,10 @@ const searchFormItemEl = document.querySelector<HTMLFormElement>(".form--search-
 const formInputSearchEl = document.querySelector<HTMLInputElement>(".form__input--search")!;
 const searchItemBoxEl = document.querySelector<HTMLDivElement>(".search-item-box")!;
 
-const listEl = document.querySelector<HTMLUListElement>(".list")!;
+const listEl = document.querySelector<HTMLOListElement>(".list")!;
 
-let index: number = 1;
 let editMode: boolean = false;
-let editItemId: number;
+let editItemId: number | null;
 
 type WebsiteListItem = {
   id: number;
@@ -26,21 +25,8 @@ const lists: WebsiteListItem[] = getStorageItems();
 
 lists.forEach((item) => render(item));
 
-function createItem(webName: string, webUrl: string): WebsiteListItem {
-  return { id: Date.now(), name: webName, href: webUrl };
-}
-
 function addItemToList(websiteListItem: WebsiteListItem) {
   lists.push(websiteListItem);
-}
-
-function createButton(textContent: string, classes: string[], id: string): HTMLButtonElement {
-  const button = document.createElement("button");
-  button.textContent = textContent;
-  button.setAttribute("class", classes.join(" "));
-  button.setAttribute("id", id);
-
-  return button;
 }
 
 function render(item: WebsiteListItem) {
@@ -50,7 +36,7 @@ function render(item: WebsiteListItem) {
 
   // Link to the url
   const a = document.createElement("a");
-  a.textContent = `${index}. ${item.name}`;
+  a.textContent = `${item.name}`;
   a.setAttribute("href", item.href);
   a.setAttribute("id", item.id.toString());
   a.setAttribute("class", "list__link");
@@ -73,18 +59,6 @@ function render(item: WebsiteListItem) {
   li.appendChild(buttonBoxEl);
 
   listEl.appendChild(li);
-
-  index++;
-}
-
-function updateStorage() {
-  localStorage.setItem("items", JSON.stringify(lists));
-}
-
-function getStorageItems(): WebsiteListItem[] | [] {
-  const storedLists = localStorage.getItem("items");
-
-  return storedLists ? JSON.parse(storedLists) : [];
 }
 
 function displaySearchResult(item: WebsiteListItem) {
@@ -134,8 +108,11 @@ function handleSubmit(event: SubmitEvent) {
       itemToEdit.name = webName;
       itemToEdit.href = webUrl;
       render(itemToEdit);
-      updateStorage();
+      updateStorage(lists);
     }
+
+    editMode = false;
+    editItemId = null;
 
     return;
   }
@@ -146,7 +123,7 @@ function handleSubmit(event: SubmitEvent) {
 
   render(newListItem);
 
-  updateStorage();
+  updateStorage(lists);
 
   formInputWebNameEl.value = "";
   formInputWebUrlEl.value = "";
@@ -174,7 +151,7 @@ function handleDeleteItem(event: MouseEvent) {
     const itemIndex = lists.findIndex((el) => el.id === id);
     lists.splice(itemIndex, 1);
     document.getElementById(`${id}`)?.remove();
-    updateStorage();
+    updateStorage(lists);
   }
 }
 
